@@ -35,10 +35,10 @@ fn main() -> ! {
     let mut bird_coord = (2, 1);
     let mut game_over = false;
     
-    rprintln!("Entering main loop.");
+    //rprintln!("Entering main loop.");
     loop {
         let mut counter = 0;
-        let mut pipes:[u32; 5] = [0,0,0,0,0];
+        let mut pipes:[usize; 5] = [0,0,0,0,0];
 
         let mut screen = [
             [0, 0, 0, 0, 0],
@@ -62,7 +62,7 @@ fn main() -> ! {
                 let new_pipe = rng.random_u32() % 5;
 
                 // update pipe array
-                pipes[4] = new_pipe;
+                pipes[4] = new_pipe as usize;
 
             };
 
@@ -118,7 +118,7 @@ fn main() -> ! {
                 
                 // Put jumped bird on the screen
                 screen[bird_coord.0][bird_coord.1] = 1;
-                rprintln!("bird jumped");
+                //rprintln!("bird jumped");
 
                 //timer.delay_ms(250 as u16);
 
@@ -131,7 +131,7 @@ fn main() -> ! {
                 
                 // bird falls one step
                 screen[bird_coord.0][bird_coord.1] = 1;
-                rprintln!("bird fell");
+                //rprintln!("bird fell");
 
                 // timer.delay_ms(500 as u16);
             }
@@ -139,6 +139,16 @@ fn main() -> ! {
             // display screen with pipes and bird
             display.clear();
             display.show(&mut timer, screen, 500);
+
+            // hit detection
+            // use pipe number to determine if bird is not in the gap
+            // note pipe value of 1 corresponds to bird coord equal to 4
+            // and pipe value of 5 corresponds to bird coord equal to 0
+            if pipes[1] != 0 {
+                if (bird_coord.0 !=  5 - pipes[1]) && (bird_coord.0 != 4 - pipes[1]) {
+                    game_over = true;
+                }
+            }
             
             // increment counter to indicate pipes have moved over one space
             counter += 1;
@@ -146,6 +156,6 @@ fn main() -> ! {
             timer.delay_ms(500 as u16);
         }
 
-        rprintln!("Game is over")
+        //rprintln!("Game is over")
     }
 }
