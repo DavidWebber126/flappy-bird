@@ -1,3 +1,3 @@
 This my attempt to make the flappy bird game on a MicrobitV2 in Rust using HAL packages.
 
-See the Rust discovery book to learn more about embedded rust: https://docs.rust-embedded.org/discovery/
+See the Rust discovery book to learn more about embedded rust: [Link text](https://docs.rust-embedded.org/discovery/)
