@@ -3,8 +3,9 @@
 
 use cortex_m_rt::entry;
 use embedded_hal::{digital::v2::InputPin, blocking::delay::DelayMs};
-use rtt_target::{rtt_init_print, rprintln};
-use panic_rtt_target as _;
+//use rtt_target::{rtt_init_print, rprintln};
+//use panic_rtt_target as _;
+use panic_halt as _;
 
 use microbit::{
     display::blocking::Display,
@@ -21,7 +22,7 @@ pub enum Pipe {
 
 #[entry]
 fn main() -> ! {
-    rtt_init_print!();
+    //rtt_init_print!();
 
     let board = microbit::Board::take().unwrap();
     let mut timer = Timer::new(board.TIMER0);
@@ -138,7 +139,11 @@ fn main() -> ! {
 
             // display screen with pipes and bird
             display.clear();
-            display.show(&mut timer, screen, 500);
+            display.show(&mut timer, screen, 200);
+            screen[bird_coord.0][bird_coord.1] = 0;
+            display.show(&mut timer, screen, 100);
+            screen[bird_coord.0][bird_coord.1] = 1;
+            display.show(&mut timer, screen, 200);
 
             // hit detection
             // use pipe number to determine if bird is not in the gap
