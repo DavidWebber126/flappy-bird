@@ -243,6 +243,9 @@ fn main() -> ! {
 // RTC interrupt, exectued for each RTC tick
 #[interrupt]
 fn RTC0() {
+    static mut COUNTER: u32 = 0;
+    static mut SWITCHES: [u32; 3] = [5, 8, 20];
+    static mut STATE: usize = 0;
     /* Enter critical section */
     cortex_m::interrupt::free(|cs| {
         /* Borrow devices */
@@ -250,11 +253,26 @@ fn RTC0() {
             SPEAKER.borrow(cs).borrow().as_ref(),
             RTC.borrow(cs).borrow().as_ref(),
         ) {
-            speaker.set_period(Hertz(2));
+            if *STATE == 0 {
+                speaker.set_prescaler(pwm::Prescaler::Div128);
+                speaker.set_period(Hertz(2));
+                let max_duty = speaker.max_duty();
+                speaker.set_duty_on_common(max_duty / 4);
+            } else if *STATE == 1 {
+                speaker.set_prescaler(pwm::Prescaler::Div128);
+                speaker.set_period(Hertz(80));
+                let max_duty = speaker.max_duty();
+                speaker.set_duty_on_common(max_duty / 4);
+            } else if *STATE == 2 {
+                speaker.set_prescaler(pwm::Prescaler::Div64);
+                speaker.set_period(Hertz(400));
+                let max_duty = speaker.max_duty();
+                speaker.set_duty_on_common(max_duty / 8);
+            }
 
             // Restart the PWM at 50% duty cycle
-            let max_duty = speaker.max_duty();
-            speaker.set_duty_on_common(max_duty / 4);
+            // let max_duty = speaker.max_duty();
+            // speaker.set_duty_on_common(max_duty / 4);
 
             if SPEAKER_OFF.borrow(cs).clone().into_inner() {
                 speaker.disable();
@@ -265,4 +283,10 @@ fn RTC0() {
             rtc.reset_event(RtcInterrupt::Tick);
         }
     });
+
+    *COUNTER += 1;
+    if *COUNTER >= SWITCHES[*STATE] {
+        *COUNTER = 0;
+        *STATE = (*STATE + 1) % 3;
+    }
 }
